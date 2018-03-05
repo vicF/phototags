@@ -1,0 +1,12 @@
+{
+  "require": {
+  },
+  "autoload": {
+    "psr-0": {
+      "DPZ": "vendor/dopiaza/DPZFlickr/src/"
+    },
+    "psr-4": {
+      "Fokin\\PhotoTags\\": "Src/"
+    }
+  }
+}
