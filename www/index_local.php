@@ -42,17 +42,22 @@ try {
             $title = basename($it->getSubPathName());
             $comment = '';
             if (preg_match('/(\.jpg|\.png|\.bmp\.mov\.gif\.tiff\.mp4\.3gp)$/i', $it->getBasename())) {
-
-
-                $results = $db->query("SELECT image_id FROM image_files WHERE server = 2 AND path = '" . $it->key() . "'");
+                try {
+                    $sql = "SELECT image_id FROM image_files WHERE server = 2 AND path = '" . $db->escapeString($it->key()) . "'";
+                    $results = $db->query($sql);
+                } catch (\Throwable $e) {
+                    echo $sql . "\n";
+                    echo $e;
+                    die();
+                }
                 if ($results !== false) {
                     while ($row = $results->fetchArray()) {
-                        $comment .= "<span style=\"color:darkgoldenrod\">Already in database, id: {$row['image_id']}!!!</span>
-                        <br/>";
+                        $comment .= "Already in database, id: {$row['image_id']}!!!";
                         //$file = new ImageFile($it->key());
                         //$timestamp = $file->timestamp();
                         //$db->exec("UPDATE images set `timestamp` = $timestamp WHERE image_id = ".$row['image_id']);
-                        Tpl\Tpl::showImage($it->getSubPathName(), $it->getSubPathName(), $comment);
+                        //Tpl\Tpl::showImage($it->getSubPathName(), $it->getSubPathName(), $comment);
+                        echo $it->getSubPathName() . "\n$comment\n\n";
                         $it->next();
                         continue 2;
                     }
@@ -61,30 +66,32 @@ try {
 
                 $timestamp = $file->timestamp();
 
-                $path = $it->key();
+                $path = $db->escapeString($it->key());
                 $filesize = $file->size();
                 $width = $file->width();
                 $height = $file->height();
 
+
+                $title = $db->escapeString($title);
                 $db->exec("INSERT INTO images (`title`, `timestamp`) VALUES ('{$title}', $timestamp)");
 
                 $image_id = $db->lastInsertRowid();
                 $db->exec("
             INSERT INTO image_files (image_id, server, path, filesize, width, height, service_id, thumb_url) 
             VALUES ({$image_id}, 2, '{$path}', '{$filesize}', '{$width}', '{$height}', null, null)");
-                $comment .= 'Added, id:'.$image_id;
+                $comment .= 'Added, id:' . $image_id;
 
-                Tpl\Tpl::showImage($it->getSubPathName(), $it->getSubPathName(), $comment);
-
+                //Tpl\Tpl::showImage($it->getSubPathName(), $it->getSubPathName(), $comment);
+                echo $it->getSubPathName() . "\n$comment\n\n";
             }
         }
         $it->next();
     }
-    echo 'SubPathName: ' . $it->getSubPathName() . "<br />";
-    Tpl\Tpl::end();
+    echo 'SubPathName: ' . $it->getSubPathName();
+    //Tpl\Tpl::end();
 
 } catch (\Throwable $e) {
     echo $e;
 }
-Tpl\Tpl::endBody();
+//Tpl\Tpl::endBody();
 ?>
