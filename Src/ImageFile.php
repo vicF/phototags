@@ -2,6 +2,8 @@
 
 namespace Fokin\PhotoTags;
 
+//use getID3;
+
 
 /**
  * Class ImageFile
@@ -36,6 +38,8 @@ class ImageFile
      */
     public function timestamp()
     {
+        //$getID3 = new getID3();
+        //$ThisFileInfo = $getID3->analyze($this->_file);
         if ($this->_readExif()) {
             $timeIndexes = ['DateTimeOriginal', 'DateTime', 'FileDateTime'];
             foreach ($timeIndexes as $index) {
@@ -50,9 +54,12 @@ class ImageFile
                 }
             }
         }
-        return filectime($this->_file);
+        return filemtime($this->_file);
     }
 
+    /**
+     * @return int
+     */
     public function size()
     {
         if ($this->_readExif() AND array_key_exists('FileSize', $this->_exif)) {
@@ -62,6 +69,9 @@ class ImageFile
         }
     }
 
+    /**
+     * @return null
+     */
     public function width()
     {
         if ($this->_readExif() AND array_key_exists('COMPUTED', $this->_exif)) {
@@ -71,6 +81,9 @@ class ImageFile
         }
     }
 
+    /**
+     * @return null
+     */
     public function height()
     {
         if ($this->_readExif() AND array_key_exists('COMPUTED', $this->_exif)) {

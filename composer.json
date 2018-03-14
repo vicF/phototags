@@ -1,5 +1,16 @@
 {
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "repositories": [
+    {
+      "url": "https://github.com/JamesHeinrich/getID3.git",
+      "type": "git"
+    }
+  ],
   "require": {
+    "james-heinrich/getid3": "~1.9",
+    "appserver-io/webserver": "dev-master"
+
   },
   "autoload": {
     "psr-0": {

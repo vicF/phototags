@@ -1,21 +1,17 @@
 <?php
 
+
 namespace Fokin\PhotoTags;
 
+use Fokin\PhotoTags\Iterator\Database;
+
 require_once '../common.php';
-
-$db = new \SQLite3('db/phototags1.db');
-if (!$db) {
-    $error = (file_exists('../db/phototags1.db')) ? "Impossible to open, check permissions" : "Impossible to create, check permissions";
-    die($error);
-}
-$db->enableExceptions(true);
-
-set_time_limit(0);
-$db->busyTimeout(10000);
+$db = Service::Database();
 
 $total = 0;
 $duplicates = 0;
+
+$dbIterator = new Database("select f.rowid as file_id, * from image_files f left join images i on i.image_id = f.image_id order by filesize, title, timestamp");
 
 try {
     $sql = "select f.rowid as file_id, * from image_files f left join images i on i.image_id = f.image_id order by filesize, title, timestamp";
@@ -26,11 +22,13 @@ try {
 }
 $oldString = '';
 $oldId = null;
-if ($results !== false) {
-    while ($row = $results->fetchArray()) {
+
+//if ($results !== false) {
+    foreach ($dbIterator as $row) {
+        //  while ($row = $results->fetchArray()) {
         //echo "Processing: {$row['path']}\n";
         $newString = $row['filesize'] . '=' . $row['title'] . '=' . $row['timestamp'];
-        if ($newString == $oldString) {
+        if ($newString == $oldString and $oldId != $row['image_id']) {
             echo "Duplicate!!! $oldString\n";
             $sql = "update image_files set image_id = {$oldId} where rowid = {$row['image_file_id']}";
             echo $sql . "\n";
@@ -47,4 +45,4 @@ if ($results !== false) {
     }
 
     echo "total: $total, duplicates:$duplicates\n";
-}
+//}

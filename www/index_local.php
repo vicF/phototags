@@ -41,7 +41,8 @@ try {
         if (!$it->isDot()) {
             $title = basename($it->getSubPathName());
             $comment = '';
-            if (preg_match('/(\.jpg|\.png|\.bmp\.mov\.gif\.tiff\.mp4\.3gp)$/i', $it->getBasename())) {
+            //if (preg_match('/(\.jpg|\.png|\.bmp|\.mov|\.gif|\.tiff|\.mp4|\.3gp|\.wma|\.wmv)$/i', $it->getBasename())) {
+                if (preg_match('/(\.mov|\.mp4|\.3gp|\.wma|\.wmv)$/i', $it->getBasename())) {
                 try {
                     $sql = "SELECT image_id FROM image_files WHERE server = 2 AND path = '" . $db->escapeString($it->key()) . "'";
                     $results = $db->query($sql);
