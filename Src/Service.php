@@ -2,6 +2,7 @@
 
 namespace Fokin\PhotoTags;
 
+
 /**
  * Class Service
  */
@@ -25,5 +26,35 @@ class Service
             $db->busyTimeout(10000);
         }
         return $db;
+    }
+
+    /**
+     * @param string $mode
+     * @return Flickr
+     * @throws \Exception
+     */
+    public static function Flickr($mode = 'write')
+    {
+        static $flickr;
+
+        if (empty($flickr)) {
+            session_start();
+            $_SESSION[Flickr::SESSION_OAUTH_DATA] = unserialize(file_get_contents('sessions/1.dat'));
+
+            $callback = sprintf('%s://%s:%d%s',
+                (@$_SERVER['HTTPS'] == "on") ? 'https' : 'http',
+                @$_SERVER['SERVER_NAME'],
+                @$_SERVER['SERVER_PORT'],
+                @$_SERVER['SCRIPT_NAME']
+            );
+
+            $flickr = new Flickr(FLICKR_API_KEY, FLICKR_API_SECRET, $callback);
+
+            if (!$flickr->authenticate($mode)) {
+                throw new \Exception("Unable to authenticate to Flickr ...\n");
+            }
+        }
+
+        return $flickr;
     }
 }
