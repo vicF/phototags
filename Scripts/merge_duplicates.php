@@ -11,15 +11,9 @@ $db = Service::Database();
 $total = 0;
 $duplicates = 0;
 
-$dbIterator = new Database("select f.rowid as file_id, * from image_files f left join images i on i.image_id = f.image_id order by filesize, title, timestamp");
+$dbIterator = new Database("select f.rowid as file_id, * from image_files f left join images i on i.image_id = f.image_id order by  title, timestamp, filesize");
 
-try {
-    $sql = "select f.rowid as file_id, * from image_files f left join images i on i.image_id = f.image_id order by filesize, title, timestamp";
-    $results = $db->query($sql);
-} catch (\Throwable $e) {
-    echo $sql . "\n";
-    die($e);
-}
+
 $oldString = '';
 $oldId = null;
 
@@ -27,7 +21,8 @@ $oldId = null;
     foreach ($dbIterator as $row) {
         //  while ($row = $results->fetchArray()) {
         //echo "Processing: {$row['path']}\n";
-        $newString = $row['filesize'] . '=' . $row['title'] . '=' . $row['timestamp'];
+        $newString = //$row['filesize'] . '=' .
+            $row['title'] . '=' . $row['timestamp'];
         if ($newString == $oldString and $oldId != $row['image_id']) {
             echo "Duplicate!!! $oldString\n";
             $sql = "update image_files set image_id = {$oldId} where rowid = {$row['image_file_id']}";

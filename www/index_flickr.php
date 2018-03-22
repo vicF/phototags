@@ -63,6 +63,7 @@ try {
                 while ($row = $results->fetchArray()) {
                     ?><span style="color:darkgoldenrod">Already in database, id: <?=$row['image_id']?>!!!</span><br/><?php
                     continue 2;
+
                 }
             }
             $headers = get_headers($photo['url_o'], 1);
