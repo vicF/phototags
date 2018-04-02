@@ -28,31 +28,41 @@ try {
         $photos = $response['photos'];
         foreach ($photos['photo'] as $photo) {
             echo "{$photo['datetaken']} {$photo['title']} \n";
-
-            $results = $db->query("SELECT image_id FROM image_files WHERE service_id = '{$photo['id']}'");
-            if ($results !== false) {
-                while ($row = $results->fetchArray()) {
-                    echo "Already in database, id: {$row['image_id']}!!!\n";
-                    $results1 = $db->query("SELECT image_id FROM image_files WHERE server=2 AND path like '%{$photo['description']['_content']}'");
-                    $dup = $results->fetchArray();
-                    if($dup===false) {
-                        continue 2;
+            $description = html_entity_decode($photo['description']['_content']);
+            $localImageId = null;
+            if (strlen($description) > 14) {
+                // description may look like 2012/2012-01-01
+                $path = \SQLite3::escapeString("{$description}/{$photo['title']}");
+                $localImageId = $db->querySingle("SELECT image_id FROM image_files WHERE server=2 and path like '%{$path}'");
+                if (!empty($localImageId)) {
+                    // There is an image for this in database. Now let's check if it is already linked to this flickr
+                    $flickrImageId = $db->querySingle("SELECT image_id FROM image_files WHERE service_id = '{$photo['id']}'");
+                    if (!empty($flickrImageId)) {
+                        // There's already record for flickr
+                        if ($flickrImageId == $localImageId) {
+                            // that's OK! Nothing to do!
+                            echo "OK!\n";
+                            continue;
+                        } else {
+                            // Files are the same but linked to different image_id
+                            $db->exec("UPDATE image_files SET image_id = {$flickrImageId} WHERE image_id = {$localImageId}");
+                            $db->exec("DELETE FROM images WHERE image_id = {$localImageId}");
+                            echo "Merged {$localImageId} with {$flickrImageId}\n";
+                        }
                     } else {
-                        echo '';
+                        // This image is not in database
+                        Base::addImageFileToBaseFromFlickr($photo, $localImageId);
+                        echo "Added from Flickr\n";
                     }
-
+                } else {
+                    // Image with such description is not found in the database
+                    // Do nothing so far ...
+                    echo "Skipping so far\n";
                 }
+            } else {
+                // Image has short description. It was likely not loaded from main storage but from phone.
+                echo "Short description\n";
             }
-            $headers = get_headers($photo['url_o'], 1);
-            $timestamp = strtotime($photo['datetaken']);
-
-            //$res = $db->exec("INSERT INTO images (`title`, `timestamp`) VALUES ('{$photo['title']}', $timestamp)");
-
-            //$image_id = $db->lastInsertRowid();
-            /*$query = $db->exec("
-        INSERT INTO image_files (image_id, server, path, filesize, width, height, service_id, thumb_url)
-        VALUES ({$image_id}, 1, '{$photo['url_o']}', '{$headers['Content-Length']}', '{$photo['width_o']}', '{$photo['height_o']}', '{$photo['id']}', '{$photo['url_t']}')");*/
-
 
         }
 

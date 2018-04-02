@@ -24,7 +24,7 @@ try {
         $title = @$row['title'];
 
         $tag = '';
-        $description=$row['path'];
+        $description=basename(dirname(dirname($row['path']))) .'/'.basename(dirname($row['path']));
 
         $parameters = [
             'title' => $title,
@@ -57,7 +57,8 @@ try {
             //$photos = $response['photos'];
             //$message = "Photo uploaded";
         } else {
-            throw new \Exception(@print_r($response['err'], 1));
+            @print_r($response['err']);
+            //throw new \Exception(@print_r($response['err'], 1));
             //$message = "Error: " . @$err['msg'];
         }
 
