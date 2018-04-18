@@ -21,9 +21,19 @@ class Base
 
         $photos = $response['photos'];
         foreach ($photos['photo'] as $photo) {
-            $db->exec("
-            UPDATE image_files SET path = '{$photo['url_o']}', width = '{$photo['width_o']}', height = '{$photo['height_o']}',  thumb_url = '{$photo['url_t']}')
-             WHERE service_id = '{$photo['id']}'");
+            if(empty($photo['id'])) {
+                print_r($photo);
+                throw new \Exception('Empty photo data');
+            }
+            $smt = $db->prepare("
+            UPDATE image_files SET path = ':url_o', width = ':width_o', height = ':height_o',  thumb_url = ':url_t'
+             WHERE service_id = ':id'");
+            $smt->bindValue(':url_o', $photo['url_o'], SQLITE3_TEXT);
+            $smt->bindValue(':width_o', $photo['width_o'], SQLITE3_NUM);
+            $smt->bindValue(':height_o', $photo['height_o'], SQLITE3_NUM);
+            $smt->bindValue(':url_t', $photo['url_t'], SQLITE3_TEXT);
+            $smt->bindValue(':id', $photo['id'], SQLITE3_NUM);
+            $smt->execute();
         }
     }
 

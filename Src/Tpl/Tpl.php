@@ -84,8 +84,9 @@ public static function startHeader()
                         public static function image($src, $title, $comment)
                         { ?>
                             <td><img title="<?= $title ?>" width="150"
-                                     src="Photo/<?= $src ?>"/><?php if ($comment) {
-                            echo '<br />' .$title.'<br />' . $comment;} ?></td><?php
+                                     src="<?= $src ?>"/><?php if ($comment) {
+                            echo '<br />' . $title . '<br />' . $comment;
+                        } ?></td><?php
 
                         }
 
@@ -184,6 +185,28 @@ public static function showImage($src, $title, $comment = null)
     self::$_imageColumn++;
 
 }
+
+/**
+ * @param $image
+ */
+public static function showAnyImage($image)
+{
+    switch ($image['server']) {
+        case 1:
+            $url = $image['path'];
+            $comment = 'local';
+            break;
+        case 2:
+            $url = 'http://localhost:8001/' . substr($image['path'], 18);
+            $comment = 'flickr';
+            break;
+        default:
+            throw new \Exception('Unknown server type: ' . $image['server']);
+    }
+    self::showImage($url, $image['title'], $comment);
+}
+
+
 public static function end()
 {
     self::endBody();

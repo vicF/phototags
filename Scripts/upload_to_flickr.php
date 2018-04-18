@@ -15,6 +15,9 @@ try {
 
     $flickr = Service::Flickr();
 
+    $now = new \DateTime("now");
+    $stop = new \DateTime('+1 day 9:00 AM');
+
     $counter = 0;
     foreach ($query as $row) {
         echo $row['path'] . "\n";
@@ -65,15 +68,12 @@ try {
         if($counter++ > 100) {
             Base::fillFlickrDataForRecentUploads($startTime-600);
             $counter= 0;
-            $now = new \DateTime("now");
-            $stop = new \DateTime("09:00");
+
             if($now > $stop) {
                 echo 'Exiting in the morning';
                 break;
             }
         }
-
-
 
     }
     if($counter!= 0 ) {
