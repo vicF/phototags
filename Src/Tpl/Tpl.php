@@ -1,6 +1,6 @@
-<?php
+<?PHP
 
-namespace Fokin\PhotoTags\Tpl;
+namespace Fokin\PhotoTags\Tpl {
 
 /**
  * Class Tpl
@@ -46,6 +46,7 @@ public static function startHeader()
 ?>
 <div class="header"><?php
     }
+
     public static function endHeader()
     {
         ?><?php
@@ -105,17 +106,18 @@ public static function startHeader()
             ?></td><?php
         }
 
-        public static function startRight()
-        {
-        ?>
-            <td id="right"><?php
-                }
 
-                public static function endRight()
-                {
-                ?></td>
-        </tr>
-    </table><?php
+public static function startRight()
+{
+?>
+    <td id="right"><?php
+        }
+
+        public static function endRight()
+        {
+        ?></td>
+</tr>
+</table><?php
 }
 
 
@@ -125,12 +127,12 @@ public static function startHeader()
 public static function startFooter()
 {
 ?>
-    <div id="footer"><?php
-        }
+<div id="footer"><?php
+}
 
-        public static function endFooter()
-        {
-        ?></div><?php
+public static function endFooter()
+{
+?></div><?php
 }
 
 public static function endBody()
@@ -142,74 +144,84 @@ public static function endBody()
 
 public static function setLeft($content)
 {
-    self::$_leftContent = $content;
+self::$_leftContent = $content;
 }
+
 public static function setRight($content)
 {
-    self::$_rightContent = $content;
+self::$_rightContent = $content;
 }
 
 public static function start()
 {
-    self::startBody();
-    self::startHeader();
-    self::endHeader();
-    self::startLeft();
-    echo self::$_leftContent;
-    self::endLeft();
-    self::startMain();
-    self::$_startedMain = true;
+self::startBody();
+self::startHeader();
+self::endHeader();
+self::startLeft();
+echo self::$_leftContent;
+self::endLeft();
+self::startMain();
+self::$_startedMain = true;
 }
 
-/**
- * @param $src
- * @param $title
- */
+
 public static function showImage($src, $title, $comment = null)
 {
-    if (!self::$_startedMain) {
-        self::start();
-    }
-    if (!self::$_startedImages) {
-        self::startImages();
-    }
-    if (self::$_imageColumn == 1) {
-        self::startImageRow();
-    }
-    self::image($src, $title, $comment);
-    if (self::$_imageColumn == self::COLUMN_WIDTH) {
-        self::endImageRow();
-        self::$_imageColumn = 1;
-        return;
-    }
-    self::$_imageColumn++;
+if (!self::$_startedMain) {
+self::start();
+}
+if (!self::$_startedImages) {
+self::startImages();
+}
+if (self::$_imageColumn == 1) {
+self::startImageRow();
+}
+self::image($src, $title, $comment);
+if (self::$_imageColumn == self::COLUMN_WIDTH) {
+self::endImageRow();
+self::$_imageColumn = 1;
+return;
+}
+self::$_imageColumn++;
 
 }
 
-/**
- * @param $image
- */
+
+
+public static function nextImageRow()
+{
+while (self::$_imageColumn < self::COLUMN_WIDTH) {
+?>
+<td></td><?php
+self::$_imageColumn++;
+}
+self::endImageRow();
+self::$_imageColumn = 1;
+
+}
+
+
 public static function showAnyImage($image)
 {
-    switch ($image['server']) {
-        case 1:
-            $url = $image['path'];
-            $comment = 'local';
-            break;
-        case 2:
-            $url = 'http://localhost:8001/' . substr($image['path'], 18);
-            $comment = 'flickr';
-            break;
-        default:
-            throw new \Exception('Unknown server type: ' . $image['server']);
-    }
-    self::showImage($url, $image['title'], $comment);
+switch ($image['server']) {
+case 1:
+    $url = $image['path'];
+    $comment = 'local';
+    break;
+case 2:
+    $url = 'http://localhost:8001/' . substr($image['path'], 18);
+    $comment = 'flickr';
+    break;
+default:
+    throw new \Exception('Unknown server type: ' . $image['server']);
+}
+self::showImage($url, $image['title'], $comment);
 }
 
 
 public static function end()
 {
-    self::endBody();
+self::endBody();
 }
 }
-
+}
