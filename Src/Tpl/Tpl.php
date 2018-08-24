@@ -47,9 +47,19 @@ public static function startHeader()
 <div class="header"><?php
     }
 
+    public static function header() {
+        ?><form  id="selectors" method="post"><button type="submit" name="page" form="selectors" value="prev">&lt;&lt;</button><button type="submit" name="page" form="selectors" value="1">1</button><button type="submit" form="selectors" name="page" value="next">&gt;&gt;</button> Sources: <label>Local</label><input type="checkbox" name="source[]" value="2" checked /> <label>Flickr</label><input type="checkbox" name="source[]" value="1" checked /><select>
+                <option value="size">none</option>
+                <option value="size">Size</option>
+                <option value="time">Time</option>
+                <option value="source">Source</option>
+                <option value="name">Name</option>
+            </select><input type="radio" name="sortd" value="desc" checked>↓<input type="radio" name="sortd" value="asc">↑</form><?php
+    }
+
     public static function endHeader()
     {
-        ?><?php
+    ?></div><?php
     }
 
     public static function startLeft()
@@ -206,11 +216,11 @@ public static function showAnyImage($image)
 switch ($image['server']) {
 case 1:
     $url = $image['path'];
-    $comment = 'local';
+    $comment = "<a href='{$image['path']}' target='_blank'>flickr</a>";
     break;
 case 2:
     $url = 'http://localhost:8001/' . substr($image['path'], 18);
-    $comment = 'flickr';
+    $comment = "<a href='file:///{$image['path']}' target='_blank'>local</a>";
     break;
 default:
     throw new \Exception('Unknown server type: ' . $image['server']);
