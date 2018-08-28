@@ -9,33 +9,39 @@ try {
 
     if (!empty($_POST)) {
         $where = '';
-        if(!empty($_POST['source'])) {
+        if (!empty($_POST['source'])) {
             $source = [];
-            foreach($_POST['source'] as $serverId) {
-                $source[] = "server=".(int)$serverId;
+            foreach ($_POST['source'] as $serverId) {
+                $source[] = "server=" . (int)$serverId;
             }
             $source = implode(' OR ', $source);
             $where .= $source;
         }
-        if(!empty($where)) {
-            $where = ' WHERE '.$where;
+        if (!empty($where)) {
+            $where = ' WHERE ' . $where;
         }
-        $sql = "select * from image_files f left join images i on f.image_id = i.image_id {$where} order by filesize, image_id limit 1000 offset 200";
+        $sql = "from image_files f left join images i on f.image_id = i.image_id {$where} order by filesize, i.image_id";
     } else {
-        $sql = "select * from image_files f left join images i on f.image_id = i.image_id order by filesize, image_id limit 1000 offset 200";
+        $sql = "from image_files f left join images i on f.image_id = i.image_id order by filesize, i.image_id";
     }
+
+    $total = Service::Database()->querySingle('select count(*) ' . $sql);
+
+    $sql = 'select * ' . $sql . ' limit 1000 offset ' . (int)@$_POST['page'] * 1000;
 
     $dbIterator = new Database($sql);
 
     Tpl::startBody();
     Tpl::startHeader();
-    Tpl::header();
+    Tpl::header($total, @$_POST);
     Tpl::endHeader();
 
     $lastId = null;
 
     foreach ($dbIterator as $image) {
-        //if (!is_null($lastId))
+        if (!$image) {
+            break;
+        }
         Tpl::showAnyImage($image);
     }
 
