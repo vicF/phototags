@@ -24,15 +24,28 @@ try {
 
 
     do {
+        $end = true;
         $response = $flickr->call('flickr.photos.search', $parameters);
         $photos = $response['photos'];
         foreach ($photos['photo'] as $photo) {
-            echo "{$photo['datetaken']} {$photo['title']} \n";
+            $end = false;
             $description = html_entity_decode($photo['description']['_content']);
+            $path = \SQLite3::escapeString("{$description}/{$photo['title']}");
+            echo "{$photo['datetaken']} {$path} \n";
+            $localImageId = $db->querySingle("SELECT image_id FROM image_files WHERE server=" . Base::FLICKR . " and service_id = {$photo['id']}");
+
+            $media = Base::getFlickrMediaType($photo);
+            if (!empty($localImageId)) {
+                // that's OK! Already in database
+                $db->exec("UPDATE image_files SET revision = {$startTime}, status = 1  WHERE image_id = {$localImageId}");
+                $db->exec("UPDATE images SET media = $media WHERE image_id = {$localImageId}");
+                echo "OK!\n";
+                continue;
+            }
             $localImageId = null;
             if (strlen($description) > 14) {
                 // description may look like 2012/2012-01-01
-                $path = \SQLite3::escapeString("{$description}/{$photo['title']}");
+
                 $localImageId = $db->querySingle("SELECT image_id FROM image_files WHERE server=2 and path like '%{$path}'");
                 if (!empty($localImageId)) {
                     // There is an image for this in database. Now let's check if it is already linked to this flickr
@@ -41,6 +54,8 @@ try {
                         // There's already record for flickr
                         if ($flickrImageId == $localImageId) {
                             // that's OK! Nothing to do!
+                            $db->exec("UPDATE image_files SET revision = {$startTime}, status = 1  WHERE image_id = {$flickrImageId}");
+                            $db->exec("UPDATE images SET media = $media WHERE image_id = {$flickrImageId}");
                             echo "OK!\n";
                             continue;
                         } else {
@@ -56,12 +71,14 @@ try {
                     }
                 } else {
                     // Image with such description is not found in the database
-                    // Do nothing so far ...
-                    echo "Skipping so far\n";
+                    Base::addImageFileToBaseFromFlickr($photo, null, $startTime, 1);
+                    echo "Added file that is only on Flickr\n";
                 }
             } else {
                 // Image has short description. It was likely not loaded from main storage but from phone.
                 echo "Short description\n";
+                Base::addImageFileToBaseFromFlickr($photo, null, $startTime, 1);
+                echo "Added file that is only on Flickr\n";
             }
 
         }
@@ -69,7 +86,7 @@ try {
 
         $page++;
         $parameters['page'] = $page;
-    } while (true);  // Add condition to stop !!!!!!
+    } while (!$end);
 } catch (\Throwable $e) {
     echo $e;
 }

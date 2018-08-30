@@ -7,8 +7,34 @@ namespace Fokin\PhotoTags;
  */
 class Base
 {
+    const PHOTO = 0;
+    const VIDEO = 1;
+
+    const EXISTS = 1;
+    const MISSING = 0;
+    const FLICKR = 1;
+    const LOCAL = 2;
+
+    /**
+     * @param $photo
+     * @return int
+     * @throws \Exception
+     */
+    public static function getFlickrMediaType($photo)
+    {
+        switch ($photo['media']) {
+            case 'photo':
+                return self::PHOTO;
+            case 'video':
+                return self::VIDEO;
+            default:
+                throw new \Exception('Unknown media type: ' . $photo['media']);
+        }
+    }
+
     /**
      * @param $timestamp
+     * @throws \Exception
      */
     public static function fillFlickrDataForRecentUploads($timestamp)
     {
@@ -21,7 +47,7 @@ class Base
 
         $photos = $response['photos'];
         foreach ($photos['photo'] as $photo) {
-            if(empty($photo['id'])) {
+            if (empty($photo['id'])) {
                 print_r($photo);
                 throw new \Exception('Empty photo data');
             }
@@ -42,18 +68,14 @@ class Base
      * @param int $imageId
      * @return int
      */
-    public static function addImageFileToBaseFromFlickr($photo, $imageId = null) {
+    public static function addImageFileToBaseFromFlickr($photo, $imageId = null, $revision = 0, $status = 1)
+    {
         $headers = get_headers($photo['url_o'], 1);
         $timestamp = strtotime($photo['datetaken']);
+        $media = self::getFlickrMediaType($photo);
 
-        return self::addImageFile(1, $photo['url_o'],$headers['Content-Length'], $photo['width_o'], $photo['height_o'],$imageId, $photo['title'], $timestamp, $photo['id'], $photo['url_t']);
+        return self::addImageFile(1, $photo['url_o'], $headers['Content-Length'], $photo['width_o'], $photo['height_o'], $imageId, $photo['title'], $timestamp, $photo['id'], $photo['url_t'], $revision, $status, $media);
 
-        //$res = $db->exec("INSERT INTO images (`title`, `timestamp`) VALUES ('{$photo['title']}', $timestamp)");
-
-        //$image_id = $db->lastInsertRowid();
-        /*$query = $db->exec("
-    INSERT INTO image_files (image_id, server, path, filesize, width, height, service_id, thumb_url)
-    VALUES ({$image_id}, 1, '{$photo['url_o']}', '{$headers['Content-Length']}', '{$photo['width_o']}', '{$photo['height_o']}', '{$photo['id']}', '{$photo['url_t']}')");*/
     }
 
     /**
@@ -66,16 +88,17 @@ class Base
      * @param null $thumbUrl
      * @return int
      */
-    public static function addImageFile($server, $path, $size, $width, $height, $imageId = null, $title = null, $timestamp,  $serviceId = null, $thumbUrl = null) {
+    public static function addImageFile($server, $path, $size, $width, $height, $imageId = null, $title = null, $timestamp, $serviceId = null, $thumbUrl = null, $revision = 0, $status = 1, $media = Base::PHOTO)
+    {
         $db = Service::Database();
-        if(is_null($imageId)) {
-            $db->exec("INSERT INTO images (`title`, `timestamp`) VALUES ('{$title}', $timestamp)");
+        if (is_null($imageId)) {
+            $db->exec("INSERT INTO images (`title`, `timestamp`, media) VALUES ('{$title}', $timestamp, $media)");
             $imageId = $db->lastInsertRowid();
         }
 
         $db->exec("
-    INSERT INTO image_files (image_id, server, path, filesize, width, height, service_id, thumb_url)
-    VALUES ({$imageId}, {$server}, '{$path}', '{$size}', '{$width}', '{$height}', '{$serviceId}', '{$thumbUrl}')");
+    INSERT INTO image_files (image_id, server, path, filesize, width, height, service_id, thumb_url, revision, status)
+    VALUES ({$imageId}, {$server}, '{$path}', '{$size}', '{$width}', '{$height}', '{$serviceId}', '{$thumbUrl}', {$revision}, {$status})");
         return $db->lastInsertRowid();
     }
 
