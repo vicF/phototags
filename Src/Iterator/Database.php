@@ -12,6 +12,12 @@ use Fokin\PhotoTags\Service;
  */
 class Database implements \Iterator
 {
+    const NONE = 0;
+    const SIZE = 1;
+    const TIME = 2;
+    const SOURCE = 3;
+    const NAME = 4;
+
     protected $_sql;
 
     protected $_result;
@@ -19,6 +25,15 @@ class Database implements \Iterator
     protected $_current;
 
     protected $_key = 0;
+
+    public static $sortValues = [
+        self::NONE   => '',
+        self::SIZE   => ' filesize ',
+        self::TIME   => ' timestamp ',
+        self::SOURCE => ' server ',
+        self::NAME   => ' title '
+
+    ];
 
 
     /**

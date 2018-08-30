@@ -1,6 +1,6 @@
 <?PHP
 
-namespace Fokin\PhotoTags\Tpl {
+namespace Fokin\PhotoTags\Tpl {use Fokin\PhotoTags\Iterator\Database;
 
 /**
  * Class Tpl
@@ -49,7 +49,7 @@ public static function startHeader()
 
     public static function header($total, $request, $limit = 1000)
     {
-        $pages = floor($total / $limit)-1;
+        $pages = floor($total / $limit) - 1;
         if ($total % $limit > 0) {
             $pages++;
         }
@@ -61,20 +61,25 @@ public static function startHeader()
         for ($i = 0; $i <= $pages; $i++) { ?>
             <button type="submit"
             <?php if ($request['page'] == $i) { ?>style="background-color:blue"<?php } ?> name="page" form="selectors"
-                    value="<?= $i ?>"><?= $i+1 ?></button><?php
+                    value="<?= $i ?>"><?= $i + 1 ?></button><?php
         } ?>
         <button type="submit" form="selectors" name="page" value="next">&gt;&gt;</button>
         Sources: <?php foreach ($sources as $sourceId => $name) { ?><label><?= $name ?></label><input type="checkbox"
                                                                                                       name="source[]"
                                                                                                       value="<?= $sourceId ?>" <?php if (isset($sourcesChecked[$sourceId])) {
                 echo 'checked';
-            } ?> /><?php } ?>
-        <select>
-            <option value="size">none</option>
-            <option value="size">Size</option>
-            <option value="time">Time</option>
-            <option value="source">Source</option>
-            <option value="name">Name</option>
+            } ?> /><?php }
+        $sources = [Database::NONE   => 'None',
+                    Database::SIZE   => 'Size',
+                    Database::TIME   => 'Time',
+                    Database::SOURCE => 'Source',
+                    Database::NAME   => 'Name'];
+        ?>
+        <select name="sort"><?php foreach ($sources as $value => $option) { ?>
+                <option value="<?= $value ?>" <?php if ($value == $request['sort']) {
+                    echo "selected";
+                } ?> ><?= $option ?></option>
+            <?php } ?>
         </select><input type="radio" name="sortd" value="desc" checked>↓<input type="radio" name="sortd"
                                                                                value="asc">↑
         </form><?php

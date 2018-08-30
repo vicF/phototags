@@ -6,7 +6,7 @@ use Fokin\PhotoTags\Tpl\Tpl;
 
 try {
     require_once '../common.php';
-
+    $order = ' order by filesize, i.image_id ';
     if (!empty($_POST)) {
         $where = '';
         if (!empty($_POST['source'])) {
@@ -20,14 +20,26 @@ try {
         if (!empty($where)) {
             $where = ' WHERE ' . $where;
         }
-        $sql = "from image_files f left join images i on f.image_id = i.image_id {$where} order by filesize, i.image_id";
+        $sortValue = (int)@$_POST['sort'];
+        switch($sortValue) {
+            case Database::NONE:
+            case Database::NAME:
+            case Database::SIZE:
+            case Database::SOURCE:
+            case Database::TIME:
+                $order = ' ORDER BY '.Database::$sortValues[$sortValue];
+                break;
+            default:
+                $order = '';
+        }
+        $sql = "from image_files f left join images i on f.image_id = i.image_id {$where}";
     } else {
-        $sql = "from image_files f left join images i on f.image_id = i.image_id order by filesize, i.image_id";
+        $sql = "from image_files f left join images i on f.image_id = i.image_id";
     }
 
     $total = Service::Database()->querySingle('select count(*) ' . $sql);
 
-    $sql = 'select * ' . $sql . ' limit 1000 offset ' . (int)@$_POST['page'] * 1000;
+    $sql = 'select * ' . $sql . $order . ' limit 1000 offset ' . (int)@$_POST['page'] * 1000;
 
     $dbIterator = new Database($sql);
 
