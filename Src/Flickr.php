@@ -51,4 +51,46 @@ class Flickr extends \DPZ\Flickr
         $parameters = ['title' => $setName, 'primary_photo_id' => $photoId];
         return $this->call('flickr.photosets.create', $parameters);
     }
+
+    /**
+     * @param $photo
+     * @return array
+     */
+    public static function getAdditionalData($photo)
+    {
+        return ['secret' => $photo['secret']];
+    }
+
+    /**
+     * @param $photo
+     * @param int $imageId
+     * @return int
+     */
+    public static function addImageFileToBaseFromFlickr($photo, $imageId = null, $revision = 0, $status = 1)
+    {
+        $headers = get_headers($photo['url_o'], 1);
+        $timestamp = strtotime($photo['datetaken']);
+        $media = self::getFlickrMediaType($photo);
+        $data = Flickr::getAdditionalData($photo);
+
+        return Base::addImageFile(1, $photo['url_o'], $headers['Content-Length'], $photo['width_o'], $photo['height_o'], $imageId, $photo['title'], $timestamp, $photo['id'], $photo['url_t'], $revision, $status, $media, $data);
+
+    }
+
+    /**
+     * @param $photo
+     * @return int
+     * @throws \Exception
+     */
+    public static function getFlickrMediaType($photo)
+    {
+        switch ($photo['media']) {
+            case 'photo':
+                return Base::PHOTO;
+            case 'video':
+                return Base::VIDEO;
+            default:
+                throw new \Exception('Unknown media type: ' . $photo['media']);
+        }
+    }
 }

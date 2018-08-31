@@ -10,6 +10,7 @@ class Service
 {
     /**
      * @return \SQLite3
+     * @deprecated
      */
     public static function Database()
     {
@@ -25,6 +26,18 @@ class Service
             set_time_limit(0);
             $db->busyTimeout(10000);
         }
+        return $db;
+    }
+
+    /**
+     * @return PDO
+     */
+    public static function PDO () {
+        // Create (connect to) SQLite database in file
+        $db = new PDO('sqlite:db/phototags1.db');
+        // Set errormode to exceptions
+        $db->setAttribute(\PDO::ATTR_ERRMODE,
+            \PDO::ERRMODE_EXCEPTION);
         return $db;
     }
 
