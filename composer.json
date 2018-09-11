@@ -5,11 +5,17 @@
     {
       "url": "https://github.com/JamesHeinrich/getID3.git",
       "type": "git"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/vicF/yandex-disk-api"
     }
   ],
   "require": {
     "james-heinrich/getid3": "~1.9",
-    "appserver-io/webserver": "dev-master"
+    "appserver-io/webserver": "dev-master",
+    "siyahmadde/yandex-disk-api": "dev-master",
+    "guzzlehttp/guzzle": "~6.0"
 
   },
   "autoload": {

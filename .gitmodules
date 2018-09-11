@@ -1,0 +1,3 @@
+[submodule "vendor/siyahmadde/yandex-disk-api"]
+	path = vendor/siyahmadde/yandex-disk-api
+	url = /Volumes/SQLMAZE_Projects/phototags/vendor/siyahmadde/yandex-disk-api
