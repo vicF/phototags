@@ -14,6 +14,7 @@ class Base
     const MISSING = 0;
     const FLICKR = 1;
     const LOCAL = 2;
+    const YANDEX = 3;
 
 
     /**

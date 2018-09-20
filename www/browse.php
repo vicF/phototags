@@ -22,7 +22,6 @@ try {
         }
         $sortValue = (int)@$_POST['sort'];
         switch($sortValue) {
-            case Database::NONE:
             case Database::NAME:
             case Database::SIZE:
             case Database::SOURCE:
@@ -39,7 +38,7 @@ try {
 
     $total = Service::Database()->querySingle('select count(*) ' . $sql);
 
-    $sql = 'select * ' . $sql . $order . ' GROUP BY limit 1000 offset ' . (int)@$_POST['page'] * 1000;
+    $sql = 'select * ' . $sql . $order . ' limit 1000 offset ' . (int)@$_POST['page'] * 1000;
 
     $dbIterator = new Database($sql);
 

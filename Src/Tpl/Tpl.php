@@ -1,6 +1,6 @@
 <?PHP
 
-namespace Fokin\PhotoTags\Tpl {use Fokin\PhotoTags\Iterator\Database;
+namespace Fokin\PhotoTags\Tpl {use Fokin\PhotoTags\Base;use Fokin\PhotoTags\Iterator\Database;
 
 /**
  * Class Tpl
@@ -35,6 +35,18 @@ public static function startBody()
 
         #right {
             width: 300px;
+        }
+        .photo-container {
+            /*width:200px;*/
+            height:150px;
+            border-color: red;
+            border-width: 1px;
+            margin: 5px;
+            background-color:beige;
+            float: left;
+        }
+        .title {
+            font-size: xx-small;
         }
     </style>
 </head>
@@ -105,43 +117,43 @@ public static function startLeft()
         public static function startMain()
         {
         ?>
-        <td id="main"><?php
+        <div id="main"><?php
             }
 
             public static function startImages(){
             ?>
-            <table>
+
                 <?php
                 self::$_startedImages = true;
                 }
 
                 public static function startImageRow() {
                 ?>
-                <tr><?php
+                <?php
                     }
 
                     public static function image($src, $title, $comment)
                     { ?>
-                        <td><img title="<?= $title ?>" width="150"
+            <div class="photo-container"><img title="<?= $title ?>"
                                  src="<?= $src ?>"/><?php if ($comment) {
-                        echo '<br />' . $title . '<br />' . $comment;
-                    } ?></td><?php
+                        echo '<div class="title">' . $title . '</div>' . $comment;
+                    } ?></div><?php
 
                     }
 
                     public static function endImageRow() {
-                    ?></tr><?php
+                    ?><?php
             }
 
             public static function endImages()
             {
             ?>
-            </table><?php
+            <?php
         }
 
         public static function endMain()
         {
-        ?></td><?php
+        ?></div><?php
     }
 
 
@@ -245,13 +257,17 @@ public static function showAnyImage($image)
         return;
     }
     switch ($image['server']) {
-        case 1:
-            $url = $image['path'];
-            $comment = "<a href='{$image['path']}' target='_blank'>flickr</a>";
+        case Base::FLICKR:
+            $url = $image['thumb_url'];
+            $comment = "<a href='{$image['path']}' target='_blank'>Flickr</a>";
             break;
-        case 2:
+        case Base::LOCAL:
             $url = 'http://localhost:8001/' . substr($image['path'], 18);
             $comment = "<a href='file:///{$image['path']}' target='_blank'>local</a>";
+            break;
+        case Base::YANDEX:
+            $url = $image['thumb_url'];
+            $comment = "<a href='{$image['path']}' target='_blank'>Yandex</a>";
             break;
         default:
             throw new \Exception('Unknown server type: ' . $image['server']);
