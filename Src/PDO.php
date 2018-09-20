@@ -14,9 +14,17 @@ class PDO extends \PDO
      * @param array $arguments
      * @return \PDOStatement
      */
-    public function do($sql, $arguments) {
-        $st = $this->prepare($sql);
-        $st->execute($arguments);
+    public function do($sql, $arguments)
+    {
+        try {
+            $st = $this->prepare($sql);
+            $st->execute($arguments);
+        } catch (\Throwable $e) {
+            echo $e;
+            echo 'RETRYING ...';
+            sleep(3);
+            return $this->do($sql, $arguments);
+        }
         return $st;
     }
 }
