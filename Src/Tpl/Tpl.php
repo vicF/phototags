@@ -1,6 +1,8 @@
 <?PHP
 
-namespace Fokin\PhotoTags\Tpl {use Fokin\PhotoTags\Base;use Fokin\PhotoTags\Iterator\Database;
+namespace Fokin\PhotoTags\Tpl {
+
+use Fokin\PhotoTags\Base;use Fokin\PhotoTags\Iterator\Database;
 
 /**
  * Class Tpl
@@ -36,15 +38,17 @@ public static function startBody()
         #right {
             width: 300px;
         }
+
         .photo-container {
             /*width:200px;*/
-            height:150px;
+            height: 150px;
             border-color: red;
             border-width: 1px;
             margin: 5px;
-            background-color:beige;
+            background-color: beige;
             float: left;
         }
+
         .title {
             font-size: xx-small;
         }
@@ -65,7 +69,10 @@ public static function startHeader()
         if ($total % $limit > 0) {
             $pages++;
         }
-        $sources = [2 => 'local', 1 => 'Flickr'];
+        $sources = [
+            Base::LOCAL  => 'local',
+            Base::FLICKR => 'Flickr',
+            Base::YANDEX => 'Yandex'];
         $sourcesChecked = array_flip($request['source']);
         ?>
         <form id="selectors" method="post">
@@ -120,40 +127,43 @@ public static function startLeft()
         <div id="main"><?php
             }
 
-            public static function startImages(){
-            ?>
+            public static function startImages()
+            {
+                ?>
 
                 <?php
                 self::$_startedImages = true;
-                }
+            }
 
-                public static function startImageRow() {
+            public static function startImageRow()
+            {
                 ?>
                 <?php
-                    }
+            }
 
-                    public static function image($src, $title, $comment)
-                    { ?>
-            <div class="photo-container"><img title="<?= $title ?>"
-                                 src="<?= $src ?>"/><?php if ($comment) {
-                        echo '<div class="title">' . $title . '</div>' . $comment;
-                    } ?></div><?php
+            public static function image($src, $title, $comment)
+            { ?>
+                <div class="photo-container"><img title="<?= $title ?>"
+                                                  src="<?= $src ?>"/><?php if ($comment) {
+                echo '<div class="title">' . $title . '</div>' . $comment;
+            } ?></div><?php
 
-                    }
+            }
 
-                    public static function endImageRow() {
-                    ?><?php
+            public static function endImageRow()
+            {
+                ?><?php
             }
 
             public static function endImages()
             {
-            ?>
-            <?php
-        }
+                ?>
+                <?php
+            }
 
-        public static function endMain()
-        {
-        ?></div><?php
+            public static function endMain()
+            {
+            ?></div><?php
     }
 
 
