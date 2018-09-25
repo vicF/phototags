@@ -29,14 +29,16 @@ try {
             // Unsupported type
             continue;
         }
+
+        $creationDate = strtotime(@$file->exif->date_time ?: $file->created);
         $res = $db->do('SELECT media_file_id FROM media_files WHERE server_type = ' . Base::YANDEX . ' AND service_id = ?', [$file->resource_id]);
         if ($res->fetch()) {
             // Already exists
             // Just update revision
             $db->do('UPDATE media_files 
-              SET revision = ?, status = 1 
+              SET revision = ?, status = 1, created = ? 
               WHERE service_id = ?',
-                [$startTime, $file->resource_id]);
+                [$startTime, $creationDate, $file->resource_id]);
             echo " - Already exists\n";
             continue;
         } else {
@@ -58,12 +60,12 @@ try {
             $ThisFileInfo = $getID3->analyze($file->file);*/
             $db->do('INSERT INTO media_files 
               (media_id, server_type, path, filesize, 
-              width, height, service_id, 
+              width, height, created, service_id, 
               thumb_url, revision, status) 
-              VALUES (?,?,?,?,?,?,?,?,?,?)',
+              VALUES (?,?,?,?,?,?,?,?,?,?,?)',
                 [null, Base::YANDEX, $file->path, $file->size,
-                    $width, $height, $file->resource_id,
-                    $file->preview, $startTime, 1]);
+                    $width, $height, $creationDate, $file->resource_id,
+                    @$file->preview, $startTime, 1]);
             echo " - Added\n";
         }
     }
