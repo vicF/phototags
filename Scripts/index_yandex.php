@@ -36,9 +36,9 @@ try {
             // Already exists
             // Just update revision
             $db->do('UPDATE media_files 
-              SET revision = ?, status = 1, created = ? 
+              SET revision = ?, status = 1, created = ?, filename = ?
               WHERE service_id = ?',
-                [$startTime, $creationDate, $file->resource_id]);
+                [$startTime, $creationDate, $file->name, $file->resource_id]);
             echo " - Already exists\n";
             continue;
         } else {
@@ -59,11 +59,11 @@ try {
             /*$getID3 = new getID3();
             $ThisFileInfo = $getID3->analyze($file->file);*/
             $db->do('INSERT INTO media_files 
-              (media_id, server_type, path, filesize, 
+              (media_id, server_type, path, filesize, filename, 
               width, height, created, service_id, 
               thumb_url, revision, status) 
-              VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-                [null, Base::YANDEX, $file->path, $file->size,
+              VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+                [null, Base::YANDEX, $file->path, $file->size, $file->name,
                     $width, $height, $creationDate, $file->resource_id,
                     @$file->preview, $startTime, 1]);
             echo " - Added\n";

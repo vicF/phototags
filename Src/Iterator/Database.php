@@ -47,13 +47,13 @@ class Database implements \Iterator
     }
 
     /**
-     * @return resource|\SQLite3Result
+     * @return \PDOStatement
      */
     protected function _getResource()
     {
         if (!is_object($this->_result)) {
 
-            $this->_result = Service::Database()->query($this->_sql);
+            $this->_result = Service::PDO()->query($this->_sql);
         }
         return $this->_result;
     }
@@ -64,7 +64,7 @@ class Database implements \Iterator
     public function current()
     {
         if (empty($this->_current)) {
-            $this->_current = $this->_getResource()->fetchArray(SQLITE3_ASSOC);
+            $this->_current = $this->_getResource()->fetch(\PDO::FETCH_ASSOC);
         }
         return $this->_current;
     }
@@ -79,13 +79,13 @@ class Database implements \Iterator
 
     public function next()
     {
-        $this->_current = $this->_getResource()->fetchArray(SQLITE3_ASSOC);
+        $this->_current = $this->_getResource()->fetch(\PDO::FETCH_ASSOC);
         $this->_key++;
     }
 
     public function rewind()
     {
-        $this->_getResource()->reset();
+        $this->_result = null;
     }
 
     /**

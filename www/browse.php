@@ -31,12 +31,12 @@ try {
             default:
                 $order = '';
         }
-        $sql = "from image_files f left join images i on f.image_id = i.image_id {$where}";
+        $sql = "from media_files f left join media i on f.image_id = i.image_id {$where}";
     } else {
-        $sql = "from image_files f left join images i on f.image_id = i.image_id";
+        $sql = "from media_files f left join media i on f.image_id = i.image_id";
     }
 
-    $total = Service::Database()->querySingle('select count(*) ' . $sql);
+    $total = Service::PDO()->query('select count(*) ' . $sql)->fetchColumn();
 
     $sql = 'select * ' . $sql . $order . ' limit 1000 offset ' . (int)@$_POST['page'] * 1000;
 
