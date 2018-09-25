@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 25, 2018 at 11:50 AM
+-- Generation Time: Sep 25, 2018 at 12:36 PM
 -- Server version: 5.7.17
 -- PHP Version: 7.0.14
 
@@ -28,10 +28,10 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `media` (
   `media_id` int(11) NOT NULL,
-  `title` varchar(256) DEFAULT NULL,
+  `title` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
   `timestamp` timestamp NULL DEFAULT NULL,
   `type` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Lists all media like photos, videos, audio records';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Lists all media like photos, videos, audio records';
 
 -- --------------------------------------------------------
 
@@ -43,16 +43,16 @@ CREATE TABLE `media_files` (
   `media_file_id` int(11) NOT NULL,
   `media_id` int(11) DEFAULT NULL,
   `server_type` int(11) NOT NULL,
-  `path` varchar(512) NOT NULL,
-  `filesize` int(11) NOT NULL,
-  `width` int(11) NOT NULL,
-  `height` int(11) NOT NULL,
-  `service_id` varchar(256) NOT NULL COMMENT 'Unique id on the service file is stored on',
-  `thumb_url` int(11) NOT NULL,
-  `revision` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `path` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
+  `filesize` bigint(32) NOT NULL,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  `service_id` varchar(256) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Unique id on the service file is stored on',
+  `thumb_url` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
+  `revision` int(11) DEFAULT NULL,
   `status` int(11) NOT NULL,
-  `data` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Lists actual files that can be stored on different servises';
+  `data` mediumtext COLLATE utf8_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Lists actual files that can be stored on different servises';
 
 --
 -- Indexes for dumped tables
@@ -83,7 +83,7 @@ ALTER TABLE `media`
 -- AUTO_INCREMENT for table `media_files`
 --
 ALTER TABLE `media_files`
-  MODIFY `media_file_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `media_file_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=274;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

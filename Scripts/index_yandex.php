@@ -29,11 +29,11 @@ try {
             // Unsupported type
             continue;
         }
-        $res = $db->do('SELECT image_file_id FROM image_files WHERE server = ' . Base::YANDEX . ' AND service_id = ?', [$file->resource_id]);
+        $res = $db->do('SELECT media_file_id FROM media_files WHERE server_type = ' . Base::YANDEX . ' AND service_id = ?', [$file->resource_id]);
         if ($res->fetch()) {
             // Already exists
             // Just update revision
-            $db->do('UPDATE image_files 
+            $db->do('UPDATE media_files 
               SET revision = ?, status = 1 
               WHERE service_id = ?',
                 [$startTime, $file->resource_id]);
@@ -56,8 +56,8 @@ try {
 
             /*$getID3 = new getID3();
             $ThisFileInfo = $getID3->analyze($file->file);*/
-            $db->do('INSERT INTO image_files 
-              (image_id, server, path, filesize, 
+            $db->do('INSERT INTO media_files 
+              (media_id, server_type, path, filesize, 
               width, height, service_id, 
               thumb_url, revision, status) 
               VALUES (?,?,?,?,?,?,?,?,?,?)',
