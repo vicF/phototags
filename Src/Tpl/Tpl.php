@@ -2,7 +2,7 @@
 
 namespace Fokin\PhotoTags\Tpl {
 
-use Fokin\PhotoTags\Base;use Fokin\PhotoTags\Iterator\Database;
+use Fokin\PhotoTags\Base;use Fokin\PhotoTags\Iterator\Database;use Fokin\PhotoTags\Yandex;
 
 /**
  * Class Tpl
@@ -83,25 +83,26 @@ public static function startHeader()
                     value="<?= $i ?>"><?= $i + 1 ?></button><?php
         } ?>
         <button type="submit" form="selectors" name="page" value="next">&gt;&gt;</button>
-        Sources: <?php foreach ($sources as $sourceId => $name) { ?><label><?= $name ?></label><input type="checkbox"
-                                                                                                      name="source[]"
-                                                                                                      value="<?= $sourceId ?>" <?php if (isset($sourcesChecked[$sourceId])) {
-                echo 'checked';
-            } ?> /><?php }
-        $sources = [Database::NONE   => 'None',
-                    Database::SIZE   => 'Size',
-                    Database::TIME   => 'Time',
-                    Database::SOURCE => 'Source',
-                    Database::NAME   => 'Name'];
-        ?>
-        <select name="sort"><?php foreach ($sources as $value => $option) { ?>
-                <option value="<?= $value ?>" <?php if ($value == $request['sort']) {
-                    echo "selected";
-                } ?> ><?= $option ?></option>
-            <?php } ?>
-        </select><input type="radio" name="sortd" value="desc" checked>↓<input type="radio" name="sortd"
-                                                                               value="asc">↑
-        </form><?php
+        <div>Sources: <?php foreach ($sources as $sourceId => $name) { ?><label><?= $name ?></label><input
+                type="checkbox"
+                name="source[]"
+                value="<?= $sourceId ?>" <?php if (isset($sourcesChecked[$sourceId])) {
+                    echo 'checked';
+                } ?> /><?php }
+            $sources = [Database::NONE   => 'None',
+                        Database::SIZE   => 'Size',
+                        Database::TIME   => 'Time',
+                        Database::SOURCE => 'Source',
+                        Database::NAME   => 'Name'];
+            ?>
+            <select name="sort"><?php foreach ($sources as $value => $option) { ?>
+                    <option value="<?= $value ?>" <?php if ($value == $request['sort']) {
+                        echo "selected";
+                    } ?> ><?= $option ?></option>
+                <?php } ?>
+            </select><input type="radio" name="sortd" value="desc" checked>↓<input type="radio" name="sortd"
+                                                                                   value="asc">↑
+        </div></form><?php
     }
 
     public static function endHeader()
@@ -225,6 +226,11 @@ public static function start()
 }
 
 
+/**
+ * @param $src
+ * @param $title
+ * @param null $comment
+ */
 public static function showImage($src, $title, $comment = null)
 {
     if (!self::$_startedMain) {
@@ -261,14 +267,17 @@ public static function nextImageRow()
 }
 
 
+/**
+ * @param $image
+ */
 public static function showAnyImage($image)
 {
     if (!$image) {
         return;
     }
-    switch ($image['server']) {
+    $url = @$image['thumb_url'];
+    switch ($image['server_type']) {
         case Base::FLICKR:
-            $url = $image['thumb_url'];
             $comment = "<a href='{$image['path']}' target='_blank'>Flickr</a>";
             break;
         case Base::LOCAL:
@@ -276,11 +285,12 @@ public static function showAnyImage($image)
             $comment = "<a href='file:///{$image['path']}' target='_blank'>local</a>";
             break;
         case Base::YANDEX:
-            $url = $image['thumb_url'];
-            $comment = "<a href='{$image['path']}' target='_blank'>Yandex</a>";
+            $fullPath = Yandex::urlEncodeParameter($image['path']);
+            $path = Yandex::urlEncodePath(dirname(substr($image['path'], 6)));
+            $comment = "<a href='https://disk.yandex.ru/client/disk/{$path}?display=normal&groupBy=none&order=1&sort=name&view=icons&wasAsideAnimated=false&typeClustering=geo&action=null&idAlbum=undefined&idApp=client&dialog=slider&idDialog={$fullPath}' target='_blank'>Yandex</a>";
             break;
         default:
-            throw new \Exception('Unknown server type: ' . $image['server']);
+            $comment = "Unknown service ...";
     }
     self::showImage($url, $image['title'], $comment);
 }

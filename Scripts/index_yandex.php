@@ -24,6 +24,7 @@ try {
 
 
     foreach ($files as $file) {
+        //break;
         echo $file->path . "\n";
         if (!in_array($file->media_type, ['image', 'video'])) {
             // Unsupported type
@@ -31,44 +32,51 @@ try {
         }
 
         $creationDate = strtotime(@$file->exif->date_time ?: $file->created);
+        $width = null;
+        $height = null;
+        switch ($file->media_type) {
+            case 'image':
+                /** @noinspection PhpAssignmentInConditionInspection */
+                if ($sizeInfo = getimagesize($file->file)) {
+                    $width = $sizeInfo[0];
+                    $height = $sizeInfo[1];
+                }
+                $mediaType = Base::PHOTO;
+                break;
+            default;
+                $mediaType = Base::VIDEO;
+            // Probably video
+        }
         $res = $db->do('SELECT media_file_id FROM media_files WHERE server_type = ' . Base::YANDEX . ' AND service_id = ?', [$file->resource_id]);
         if ($res->fetch()) {
             // Already exists
             // Just update revision
             $db->do('UPDATE media_files 
-              SET revision = ?, status = 1, created = ?, filename = ?
+              SET revision = ?, status = 1, created = ?, filename = ?,media_type = ?
               WHERE service_id = ?',
-                [$startTime, $creationDate, $file->name, $file->resource_id]);
+                [$startTime, $creationDate, $file->name, $mediaType, $file->resource_id]);
             echo " - Already exists\n";
             continue;
         } else {
-            $width = null;
-            $height = null;
-            switch ($file->media_type) {
-                case 'image':
-                    /** @noinspection PhpAssignmentInConditionInspection */
-                    if ($sizeInfo = getimagesize($file->file)) {
-                        $width = $sizeInfo[0];
-                        $height = $sizeInfo[1];
-                    }
-                    break;
-                default;
-                    // Probably video
-            }
+
+
 
             /*$getID3 = new getID3();
             $ThisFileInfo = $getID3->analyze($file->file);*/
-            $db->do('INSERT INTO media_files 
+            Base::addMediaFile(Base::YANDEX, $file->path, $file->size, $width, $height, null, $file->name, $creationDate, $file->resource_id, @$file->preview, $startTime, 1, $mediaType, null);
+            /*$db->do('INSERT INTO media_files
               (media_id, server_type, path, filesize, filename, 
               width, height, created, service_id, 
               thumb_url, revision, status) 
               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
                 [null, Base::YANDEX, $file->path, $file->size, $file->name,
                     $width, $height, $creationDate, $file->resource_id,
-                    @$file->preview, $startTime, 1]);
+                    @$file->preview, $startTime, 1]);*/
             echo " - Added\n";
         }
     }
+    echo "Finalizing \n";
+    Base::assignMediaFiles($startTime);
 
 } catch (\Throwable $e) {
     echo $e;

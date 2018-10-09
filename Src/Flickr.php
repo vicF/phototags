@@ -73,7 +73,12 @@ class Flickr extends \DPZ\Flickr
         $media = self::getFlickrMediaType($photo);
         $data = Flickr::getAdditionalData($photo);
 
-        return Base::addImageFile(1, $photo['url_o'], $headers['Content-Length'], $photo['width_o'], $photo['height_o'], $imageId, $photo['title'], $timestamp, $photo['id'], $photo['url_t'], $revision, $status, $media, $data);
+        $size = $headers['Content-Length'];
+        if(!is_numeric($size)) {
+            throw new \Exception('Incorrect content length: '.print_r($headers));
+        }
+
+        return Base::addMediaFile(1, $photo['url_o'], $headers['Content-Length'], $photo['width_o'], $photo['height_o'], $imageId, $photo['title'], $timestamp, $photo['id'], $photo['url_t'], $revision, $status, $media, $data);
 
     }
 

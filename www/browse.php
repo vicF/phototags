@@ -6,7 +6,7 @@ use Fokin\PhotoTags\Tpl\Tpl;
 
 try {
     require_once '../common.php';
-    $order = ' order by filesize, i.image_id ';
+    $order = ' order by filesize, i.media_id ';
     if (!empty($_POST)) {
         $where = '';
         if (!empty($_POST['source'])) {
@@ -31,9 +31,9 @@ try {
             default:
                 $order = '';
         }
-        $sql = "from media_files f left join media i on f.image_id = i.image_id {$where}";
+        $sql = "from media_files f left join media i on f.media_id = i.media_id {$where}";
     } else {
-        $sql = "from media_files f left join media i on f.image_id = i.image_id";
+        $sql = "from media_files f left join media i on f.media_id = i.media_id";
     }
 
     $total = Service::PDO()->query('select count(*) ' . $sql)->fetchColumn();

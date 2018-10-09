@@ -9,7 +9,6 @@ try {
     require_once '../common.php';
 
     $flickr = Service::Flickr();
-    $db = Service::Database();
     $pdo = Service::PDO();
 
     $startTime = time();
@@ -28,44 +27,56 @@ try {
         $response = $flickr->call('flickr.photos.search', $parameters);
         $photos = $response['photos'];
         foreach ($photos['photo'] as $photo) {
+            if(empty($photo['url_o'])) {
+                if($photo['media_status'] == 'failed') {
+                    echo 'Image has failed on Flickr';
+                    continue;
+                }
+                print_r($photo);
+                die('empty url');
+            }
 
             $description = html_entity_decode($photo['description']['_content']);
-            $path = \SQLite3::escapeString("{$description}/{$photo['title']}");
+            $path = "{$description}/{$photo['title']}";
             echo "{$photo['datetaken']} {$path} \n";
-            $localImageId = $db->querySingle("SELECT image_id FROM image_files WHERE server=" . Base::FLICKR . " and service_id = {$photo['id']}");
+            $localImageId = $pdo->do("SELECT media_file_id FROM media_files WHERE server_type=? and service_id = ?", [Base::FLICKR, $photo['id']])->fetchColumn();
 
-            $media = Flickr::getFlickrMediaType($photo);
+            $mediaType = Flickr::getFlickrMediaType($photo);
             $data = json_encode(Flickr::getAdditionalData($photo));
             if (!empty($localImageId)) {
                 // that's OK! Already in database
-                $pdo->do("UPDATE image_files SET revision = ?, status = ?, data = ?  WHERE image_id = ?", [$startTime, 1, $data, $localImageId]);
+                /*$pdo->do("UPDATE media_files SET revision = ?, status = ?, data = ?, media_type = ?  WHERE media_file_id = ?", [$startTime, 1, $data, $mediaType, $localImageId]);*/
 
-                $pdo->do("UPDATE images SET media = ? WHERE image_id = ?", [$media, $localImageId]);
-                echo "OK!\n";
+                //$pdo->do("UPDATE media SET media_type = ? WHERE media_id = ?", [$media, $localImageId]);
+                echo "Already exists\n";
+                continue;
+            } else {
+                Flickr::addImageFileToBaseFromFlickr($photo, null, $startTime);
+                echo "Added new file\n";
                 continue;
             }
-            $localImageId = null;
+            /*$localImageId = null;
             if (strlen($description) > 14) {
                 // description may look like 2012/2012-01-01
 
-                $localImageId = $db->querySingle("SELECT image_id FROM image_files WHERE server=2 and path like '%{$path}'");
+                $localImageId = $pdo->do("SELECT media_id FROM media_files WHERE server_type=2 and path like concat('%', ?)", [$path])->fetchColumn();
                 if (!empty($localImageId)) {
                     // There is an image for this in database. Now let's check if it is already linked to this flickr
-                    $flickrImageId = $db->querySingle("SELECT image_id FROM image_files WHERE service_id = '{$photo['id']}'");
+                    $flickrImageId = $pdo->do("SELECT media_id FROM media_files WHERE service_id = '{$photo['id']}'")->fetchColumn();
                     if (!empty($flickrImageId)) {
                         // There's already record for flickr
                         if ($flickrImageId == $localImageId) {
                             // that's OK! Nothing to do!
-                            $pdo->do("UPDATE image_files SET revision = ?, status = ?, data = ?  WHERE image_id = ?", [$startTime, 1, $localImageId, $data]);
+                            $pdo->do("UPDATE media_files SET revision = ?, status = ?, data = ?  WHERE media_id = ?", [$startTime, 1, $localImageId, $data]);
 
-                            $pdo->do("UPDATE images SET media = ? WHERE image_id = ?", [$media, $localImageId]);
+                            $pdo->do("UPDATE media SET media_type = ? WHERE media_id = ?", [$mediaType, $localImageId]);
 
                             echo "OK!\n";
                             continue;
                         } else {
-                            // Files are the same but linked to different image_id
-                            $db->exec("UPDATE image_files SET image_id = {$flickrImageId} WHERE image_id = {$localImageId}");
-                            $db->exec("DELETE FROM images WHERE image_id = {$localImageId}");
+                            // Files are the same but linked to different media_id
+                            $pdo->do("UPDATE media_files SET media_id = ? WHERE media_id = ?", [$flickrImageId, $localImageId]);
+                            $pdo->do("DELETE FROM media WHERE media_id = ?", [$localImageId]);
                             echo "Merged {$localImageId} with {$flickrImageId}\n";
                         }
                     } else {
@@ -73,17 +84,17 @@ try {
                         Flickr::addImageFileToBaseFromFlickr($photo, $localImageId, $startTime);
                         echo "Added from Flickr\n";
                     }
-                } else {
+                }  else {
                     // Image with such description is not found in the database
                     Flickr::addImageFileToBaseFromFlickr($photo, null, $startTime);
-                    echo "Added file that is only on Flickr\n";
+                    echo "Added new file from Flickr\n";
                 }
-            } else {
+            }  else {
                 // Image has short description. It was likely not loaded from main storage but from phone.
                 echo "Short description\n";
                 Flickr::addImageFileToBaseFromFlickr($photo, null, $startTime, 1);
                 echo "Added file that is only on Flickr\n";
-            }
+            }*/
 
         }
 
@@ -91,6 +102,7 @@ try {
         $page++;
         $parameters['page'] = $page;
     } while ($photos['page'] < $photos['pages']);
+    //Base::assignMediaFiles($startTime);
 } catch (\Throwable $e) {
     echo $e;
 }
