@@ -23,7 +23,7 @@
       "DPZ": "vendor/dopiaza/DPZFlickr/src/"
     },
     "psr-4": {
-      "Fokin\\PhotoTags\\": "Src/"
+      "": "Src/"
     }
   }
 }

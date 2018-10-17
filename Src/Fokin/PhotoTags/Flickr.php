@@ -1,5 +1,6 @@
 <?php
 namespace Fokin\PhotoTags;
+use Fokin\PhotoTags\Exception\ExpectedException;
 
 /**
  * Class Flickr
@@ -64,18 +65,25 @@ class Flickr extends \DPZ\Flickr
     /**
      * @param $photo
      * @param int $imageId
+     * @param int $revision
+     * @param int $status
      * @return int
+     * @throws \Exception
      */
     public static function addImageFileToBaseFromFlickr($photo, $imageId = null, $revision = 0, $status = 1)
     {
         $headers = get_headers($photo['url_o'], 1);
+        $code = substr($headers[0], 9, 3);
+        if($code != 200) {
+            throw new ExpectedException('Wrong response code: '.print_r($headers));
+        }
         $timestamp = strtotime($photo['datetaken']);
         $media = self::getFlickrMediaType($photo);
         $data = Flickr::getAdditionalData($photo);
 
         $size = $headers['Content-Length'];
         if(!is_numeric($size)) {
-            throw new \Exception('Incorrect content length: '.print_r($headers));
+            throw new ExpectedException('Incorrect content length: '.print_r($headers));
         }
 
         return Base::addMediaFile(1, $photo['url_o'], $headers['Content-Length'], $photo['width_o'], $photo['height_o'], $imageId, $photo['title'], $timestamp, $photo['id'], $photo['url_t'], $revision, $status, $media, $data);

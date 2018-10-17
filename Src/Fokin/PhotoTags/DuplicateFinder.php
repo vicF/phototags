@@ -3,6 +3,11 @@
 namespace Fokin\PhotoTags;
 
 
+/**
+ * Class DuplicateFinder
+ *
+ * @package Fokin\PhotoTags
+ */
 class DuplicateFinder
 {
     public function select()
