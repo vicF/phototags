@@ -104,6 +104,7 @@ class Base
      * @param int $media
      * @param null $data
      * @return int
+     * @throws \Exception
      */
     public static function addMediaFile($server, $path, $size, $width, $height, $imageId = null, $title = null, $timestamp, $serviceId = null, $thumbUrl = null, $revision = 0, $status = 1, $media = Base::PHOTO, $data = null)
     {
@@ -114,7 +115,7 @@ class Base
         }
         $db = Service::PDO();
 
-        $db->do("
+        $db->run("
     INSERT INTO media_files (media_id, server_type, path, filename, filesize, width, height, service_id, thumb_url, revision, status, media_type, created, data)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, ?)", [$imageId, $server, $path, $title, $size, $width, $height, $serviceId, $thumbUrl, $revision, $status, $media, $timestamp, $data]);
         return $db->lastInsertId();
@@ -122,15 +123,16 @@ class Base
 
     /**
      * @param int $revision
+     * @throws \Exception
      */
     public static function assignMediaFiles($revision = null)
     {
         $db = Service::PDO();
-        $stmt = $db->do('SELECT `filename`, `created`, `media_type` FROM media_files WHERE media_id IS NULL');
+        $stmt = $db->run('SELECT `filename`, `created`, `media_type` FROM media_files WHERE media_id IS NULL');
 
         /** @noinspection PhpAssignmentInConditionInspection */
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $db->do("INSERT INTO media (`filename`, `created`, `media_type`) VALUES (?, ?, ?)", [$row['filename'], $row['created'], $row['media_type']]);
+            $db->run("INSERT INTO media (`filename`, `created`, `media_type`) VALUES (?, ?, ?)", [$row['filename'], $row['created'], $row['media_type']]);
         }
 
 

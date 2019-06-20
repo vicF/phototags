@@ -47,11 +47,11 @@ try {
                 $mediaType = Base::VIDEO;
             // Probably video
         }
-        $res = $db->do('SELECT media_file_id FROM media_files WHERE server_type = ' . Base::YANDEX . ' AND service_id = ?', [$file->resource_id]);
+        $res = $db->run('SELECT media_file_id FROM media_files WHERE server_type = ' . Base::YANDEX . ' AND service_id = ?', [$file->resource_id]);
         if ($res->fetch()) {
             // Already exists
             // Just update revision
-            $db->do('UPDATE media_files 
+            $db->run('UPDATE media_files 
               SET revision = ?, status = 1, created = ?, filename = ?,media_type = ?
               WHERE service_id = ?',
                 [$startTime, $creationDate, $file->name, $mediaType, $file->resource_id]);

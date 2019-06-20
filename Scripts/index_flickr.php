@@ -40,7 +40,7 @@ try {
                 $description = html_entity_decode($photo['description']['_content']);
                 $path = "{$description}/{$photo['title']}";
                 echo "{$photo['datetaken']} {$path} \n";
-                $localImageId = $pdo->do("SELECT media_file_id FROM media_files WHERE server_type=? and service_id = ?", [Base::FLICKR, $photo['id']])->fetchColumn();
+                $localImageId = $pdo->run("SELECT media_file_id FROM media_files WHERE server_type=? and service_id = ?", [Base::FLICKR, $photo['id']])->fetchColumn();
 
                 $mediaType = Flickr::getFlickrMediaType($photo);
                 $data = json_encode(Flickr::getAdditionalData($photo));

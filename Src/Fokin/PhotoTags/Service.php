@@ -34,7 +34,7 @@ class Service
      */
     public static function PDO () {
         // Create (connect to) SQLite database in file
-        $db = new PDO('mysql:host=localhost;dbname=simplefacts;charset=utf8', 'simplefacts', 'factssimple');
+        $db = new PDO('mysql:host=127.0.0.1;dbname=simplefacts;charset=utf8', 'simplefacts', 'factssimple');
         // Set errormode to exceptions
         $db->setAttribute(\PDO::ATTR_ERRMODE,
             \PDO::ERRMODE_EXCEPTION);

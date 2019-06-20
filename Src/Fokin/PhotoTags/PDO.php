@@ -15,8 +15,11 @@ class PDO extends \PDO
      * @return \PDOStatement
      * @throws \Exception
      */
-    public function do($sql, $arguments = [])
+    public function run($sql, $arguments = null)
     {
+        if ($arguments === null) {
+            $arguments = array();
+        }
         try {
             $st = $this->prepare($sql);
             $st->execute($arguments);
